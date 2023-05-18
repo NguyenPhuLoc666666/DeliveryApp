@@ -1,4 +1,4 @@
-package com.example.democrud;
+package com.locnp.deliveryappandroid_client;
 
 import org.junit.Test;
 

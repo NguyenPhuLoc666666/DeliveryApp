@@ -1,4 +1,4 @@
-package com.example.democrud;
+package com.locnp.deliveryappandroid_client;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -8,11 +8,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.democrud.model.PositionModel;
-import com.example.democrud.retrofit.PositionApi;
-import com.example.democrud.retrofit.RetrofitService;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.locnp.deliveryappandroid_client.model.PositionModel;
+import com.locnp.deliveryappandroid_client.retrofit.PositionApi;
+import com.locnp.deliveryappandroid_client.retrofit.RetrofitService;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

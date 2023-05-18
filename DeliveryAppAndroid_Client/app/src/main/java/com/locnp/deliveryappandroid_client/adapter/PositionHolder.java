@@ -1,4 +1,4 @@
-package com.example.democrud.adapter;
+package com.locnp.deliveryappandroid_client.adapter;
 
 import android.view.View;
 import android.widget.TextView;
@@ -6,7 +6,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.democrud.R;
+import com.locnp.deliveryappandroid_client.R;
 
 public class PositionHolder extends RecyclerView.ViewHolder {
 

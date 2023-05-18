@@ -12,14 +12,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.DemoCRUD"
-        android:usesCleartextTraffic="true"
+        android:theme="@style/Theme.DeliveryAppAndroid_Client"
         tools:targetApi="31">
-        <activity
-            android:name=".OrderInputActivity"
-            android:exported="false" >
-
-        </activity>
         <activity
             android:name=".MainActivity"
             android:exported="true">

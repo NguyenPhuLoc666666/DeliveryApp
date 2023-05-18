@@ -46,8 +46,10 @@ public class PositionController {
 				PositionModel currentPos = new PositionModel();
 				currentPos.setLatitude(latitude);
 				currentPos.setLongitude(longtitude);
-				currentPos.setPriority(i);
-				if(i>= 0 && i<100) currentPos.setTestData(100);
+				currentPos.setPriority(i+1);
+				if(i>= 0 && i<25) currentPos.setTestData(25);
+				if(i>= 25 && i<50) currentPos.setTestData(50);
+				if(i>= 50 && i<100) currentPos.setTestData(100);
 				if(i>= 100 && i<200) currentPos.setTestData(200);
 				if(i>= 200 && i<400) currentPos.setTestData(400);
 				if(i>= 400 && i<800) currentPos.setTestData(800);

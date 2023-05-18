@@ -1,4 +1,4 @@
-package com.example.democrud.model;
+package com.locnp.deliveryappandroid_client.model;
 
 import androidx.annotation.NonNull;
 

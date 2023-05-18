@@ -1,4 +1,4 @@
-package com.example.democrud.retrofit;
+package com.locnp.deliveryappandroid_client.retrofit;
 
 import com.google.gson.Gson;
 

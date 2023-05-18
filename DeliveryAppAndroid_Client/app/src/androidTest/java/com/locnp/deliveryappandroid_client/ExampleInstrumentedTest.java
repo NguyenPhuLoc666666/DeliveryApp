@@ -1,4 +1,4 @@
-package com.example.democrud;
+package com.locnp.deliveryappandroid_client;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.example.democrud", appContext.getPackageName());
+        assertEquals("com.locnp.deliveryappandroid_client", appContext.getPackageName());
     }
 }

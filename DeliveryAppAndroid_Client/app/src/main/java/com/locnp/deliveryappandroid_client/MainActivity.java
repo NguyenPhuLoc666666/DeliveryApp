@@ -1,4 +1,4 @@
-package com.example.democrud;
+package com.locnp.deliveryappandroid_client;
 
 import android.os.Bundle;
 import android.widget.Toast;
@@ -8,10 +8,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.democrud.adapter.PositionAdapter;
-import com.example.democrud.model.PositionModel;
-import com.example.democrud.retrofit.PositionApi;
-import com.example.democrud.retrofit.RetrofitService;
+
+import com.locnp.deliveryappandroid_client.adapter.PositionAdapter;
+import com.locnp.deliveryappandroid_client.model.PositionModel;
+import com.locnp.deliveryappandroid_client.retrofit.PositionApi;
+import com.locnp.deliveryappandroid_client.retrofit.RetrofitService;
 
 import java.util.List;
 

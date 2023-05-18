@@ -1,4 +1,4 @@
-package com.example.democrud.adapter;
+package com.locnp.deliveryappandroid_client.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,8 +7,9 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.democrud.R;
-import com.example.democrud.model.PositionModel;
+
+import com.locnp.deliveryappandroid_client.R;
+import com.locnp.deliveryappandroid_client.model.PositionModel;
 
 import java.util.List;
 

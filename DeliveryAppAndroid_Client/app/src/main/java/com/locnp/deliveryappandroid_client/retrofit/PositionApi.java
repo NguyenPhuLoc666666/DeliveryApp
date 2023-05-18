@@ -1,6 +1,8 @@
-package com.example.democrud.retrofit;
+package com.locnp.deliveryappandroid_client.retrofit;
 
-import com.example.democrud.model.PositionModel;
+
+import com.locnp.deliveryappandroid_client.model.PositionModel;
+
 import java.util.List;
 
 import retrofit2.Call;
