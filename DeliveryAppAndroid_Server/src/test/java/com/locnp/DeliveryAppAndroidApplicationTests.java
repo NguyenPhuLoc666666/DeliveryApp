@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.locnp.model.PositionDao;
-import com.locnp.model.PositionModel;
-import com.locnp.model.PositionRepository;
+import com.locnp.mtsp.entity.PositionDao;
+import com.locnp.mtsp.entity.PositionEntity;
+import com.locnp.mtsp.repository.PositionRepository;
 
 @SpringBootTest
 class DeliveryAppAndroidApplicationTests {
@@ -16,7 +16,7 @@ class DeliveryAppAndroidApplicationTests {
 	
 	@Test
 	void addPositionTest() {
-		PositionModel position = new PositionModel();
+		PositionEntity position = new PositionEntity();
 		position.setLatitude(10.570045031835078);
 		position.setLongitude(106.7728436477040);
 		position.setPriority(2);

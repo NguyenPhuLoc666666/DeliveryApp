@@ -1,4 +1,6 @@
-package com.locnp.mTSPUsingPSO;
+package com.locnp.mtsp.mTSPUsingPSO;
+
+import com.locnp.mtsp.entity.PositionEntity;
 
 public class PositionPair {
 	Position depart;
@@ -7,6 +9,11 @@ public class PositionPair {
 	public PositionPair(Position depart, Position destination) {
 		this.depart = depart;
 		this.destination = destination;
+	}
+
+	public PositionPair(PositionEntity depart, PositionEntity destination) {
+		this.depart = new Position(depart.getLatitude(),depart.getLongitude());
+		this.destination = new Position(destination.getLatitude(),destination.getLongitude());
 	}
 
 	public void setDepart(Position depart) {

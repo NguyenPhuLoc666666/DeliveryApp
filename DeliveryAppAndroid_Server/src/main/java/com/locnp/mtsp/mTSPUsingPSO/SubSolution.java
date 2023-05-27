@@ -1,32 +1,33 @@
-package com.locnp.mTSPUsingPSO;
+package com.locnp.mtsp.mTSPUsingPSO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class SubSolution {
-	private ArrayList<Position> tour = new ArrayList<Position>();
+	private List<Position> tour = new ArrayList<Position>();
 	private double cost = 0;
 	HashMap<PositionPair, Double> distances = new HashMap<>();
 
-	public SubSolution(ArrayList<Position> tour, double cost, HashMap<PositionPair, Double> distances) {
+	public SubSolution(List<Position> tour, double cost, HashMap<PositionPair, Double> distances) {
 		this.tour = tour;
 		this.cost = cost;
 		this.distances = distances;
 	}
 	
-	public SubSolution(ArrayList<Position> tour, double cost) {
-		this.tour = null;
+	public SubSolution(List<Position> tour, double cost) {
+		this.tour = tour;
 		this.cost = cost;
 		this.distances = null;
 	}
 
 
 	
-	public ArrayList<Position> getTour() {
+	public List<Position> getTour() {
 		return tour;
 	}
 
-	public void setTour(ArrayList<Position> tour) {
+	public void setTour(List<Position> tour) {
 		this.tour = tour;
 	}
 

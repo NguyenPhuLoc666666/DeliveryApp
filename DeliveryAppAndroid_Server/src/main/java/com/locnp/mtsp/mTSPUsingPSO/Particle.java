@@ -1,8 +1,9 @@
-package com.locnp.mTSPUsingPSO;
+package com.locnp.mtsp.mTSPUsingPSO;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 public class Particle {
@@ -24,14 +25,13 @@ public class Particle {
 		this.personalBestSolution = new HashMap<>();
 		this.ListOfSolutionBasedOnGroupPositions = new HashMap<>();
 		this.listOfVelocities = new HashMap<>();
-
+		this.solution = new HashMap<>();
 	}
 
 	public void updateCurrentIndexGroupOfPositions(int currentIndexGroupOfPositions) {
 		this.setCurrentIndexGroupOfPositions(currentIndexGroupOfPositions);
 		solution = ListOfSolutionBasedOnGroupPositions.get(currentIndexGroupOfPositions);
 		if (!isEqualGroupOfPosition(solution)) {
-			System.out.println();
 			HashMap<String, SubSolution> cloneSolution = new HashMap<>(solution);
 			setPersonalBestSolution(cloneSolution);
 			setBestFitness(getCostOfSolution(cloneSolution));
@@ -48,13 +48,13 @@ public class Particle {
 		ArrayList<Position> currentListOfPositions;
 
 		for (int i = 0; i < numOfShippers; i++) {
-			personalListOfPositions = personalBestSolution.get(String.valueOf(i)).getTour();
-			globalListOfPositions = globalBestParticle.get(String.valueOf(i)).getTour();
-			currentListOfPositions = solution.get(String.valueOf(i)).getTour();
-			ArrayList<Position> differentPositionList1 = new ArrayList<>(personalListOfPositions);
-			differentPositionList1.retainAll(currentListOfPositions);
-			ArrayList<Position> differentPositionList2 = new ArrayList<>(globalListOfPositions);
-			differentPositionList2.retainAll(currentListOfPositions);
+			personalListOfPositions = new ArrayList<>(personalBestSolution.get(String.valueOf(i)).getTour());
+			globalListOfPositions = new ArrayList<>(globalBestParticle.get(String.valueOf(i)).getTour());
+			currentListOfPositions = new ArrayList<>(solution.get(String.valueOf(i)).getTour());
+			ArrayList<Position> samePositionList1 = new ArrayList<>(personalListOfPositions);
+			samePositionList1.retainAll(currentListOfPositions);
+			ArrayList<Position> samePositionList2 = new ArrayList<>(globalListOfPositions);
+			samePositionList2.retainAll(currentListOfPositions);
 
 			int sizeOfCurrentList = globalListOfPositions.size();
 			int currentVelocity;
@@ -63,10 +63,11 @@ public class Particle {
 			else
 				currentVelocity = velocity.get(String.valueOf(i));
 
-			int numOfPositions = (int) Math
-					.round((w * currentVelocity + (c1 * random1.nextDouble() * differentPositionList1.size()
-							+ c2 * random2.nextDouble() * differentPositionList2.size()) / 2) / 2);
-//			System.out.println("int numOfPositions = (int) Math.round(" + numOfPositions + ")");
+			int numOfPositions = (int) Math.round((w * currentVelocity
+					+ (c1 * random1.nextDouble() * (personalListOfPositions.size() - samePositionList1.size())
+							+ c2 * random2.nextDouble() * (globalListOfPositions.size() - samePositionList2.size()))
+							/ 2)
+					/ 2);
 			if (numOfPositions > sizeOfCurrentList)
 				numOfPositions = sizeOfCurrentList - 1;
 			else if (numOfPositions < 0)
@@ -74,7 +75,7 @@ public class Particle {
 
 			velocity.put(String.valueOf(i), numOfPositions);
 		}
-		showListVelocity();
+		//showListVelocity();
 	}
 
 	public void showListVelocity() {
@@ -89,7 +90,9 @@ public class Particle {
 			return false;
 		} else {
 			for (int i = 0; i < numOfShippers; i++) {
-				int currentPersonalGroupOfPosition = personalBestSolution.get(String.valueOf(i)).getTour().size();
+				ArrayList<Position> currentList = new ArrayList<>(
+						personalBestSolution.get(String.valueOf(i)).getTour());
+				int currentPersonalGroupOfPosition = currentList.size();
 				int currentSolutionGroupOfPosition = solution.get(String.valueOf(i)).getTour().size();
 				if (currentPersonalGroupOfPosition != currentSolutionGroupOfPosition)
 					return false;
@@ -99,20 +102,19 @@ public class Particle {
 	}
 
 	public void updatePosition(HashMap<String, SubSolution> globalSolution, HashMap<PositionPair, Double> distances,
-			ArrayList<Position> listAllOfPositions, Position storeCoordinate) {
+			List<Position> positions, Position storeCoordinate) {
 		int groupOfPosition;
 		ArrayList<Position> visitedPositions = new ArrayList<Position>();
-		ArrayList<Position> unvisitedPositions = new ArrayList<Position>(listAllOfPositions);
+		ArrayList<Position> unvisitedPositions = new ArrayList<Position>(positions);
 		ArrayList<Position> listOfPositions;
 		ArrayList<Position> globalCurrentlistOfPositions;
 		ArrayList<Position> listAfterUpdate;
-		System.out.println("start update position -----------------------" + getCostOfSolution(globalSolution));
 
 		for (int i = 0; i < numOfShippers; i++) {
 			int currentVelocity = velocity.get(String.valueOf(i));
 			if (currentVelocity == 0) {
 				globalCurrentlistOfPositions = new ArrayList<Position>(globalSolution.get(String.valueOf(i)).getTour());
-				listOfPositions = solution.get(String.valueOf(i)).getTour();
+				listOfPositions = new ArrayList<Position>(solution.get(String.valueOf(i)).getTour());
 				if (getCostOfListPositions(distances, listOfPositions, storeCoordinate) < getCostOfListPositions(
 						distances, globalCurrentlistOfPositions, storeCoordinate))
 					for (int j = 0; j < listOfPositions.size(); j++) {
@@ -125,19 +127,17 @@ public class Particle {
 						unvisitedPositions.remove(globalCurrentlistOfPositions.get(j));
 					}
 			}
+			listOfPositions = new ArrayList<>();
 		}
-
 		for (int i = 0; i < numOfShippers; i++) {
-			System.out.println("update global ..................shipper: " + i);
+			//System.out.println("update from global of shipper: " + i);
+
 			listAfterUpdate = new ArrayList<>();
-			listOfPositions = solution.get(String.valueOf(i)).getTour();
-			System.out.println("listOfPositions before ..................");
-			showListPosition(listOfPositions);
+			listOfPositions = new ArrayList<>(solution.get(String.valueOf(i)).getTour());
 
 			groupOfPosition = listOfPositions.size();
 			int currentVelocity = velocity.get(String.valueOf(i));
 			globalCurrentlistOfPositions = new ArrayList<Position>(globalSolution.get(String.valueOf(i)).getTour());
-			// Collections.shuffle(globalCurrentlistOfPositions);
 			Position position = new Position();
 			int num = groupOfPosition - currentVelocity;
 			if (currentVelocity == 0) {
@@ -146,10 +146,12 @@ public class Particle {
 					listAfterUpdate = listOfPositions;
 				else
 					listAfterUpdate = globalCurrentlistOfPositions;
-				System.out.println("currentVelocity == 0 ..................");
-				showListPosition(listAfterUpdate);
+				ArrayList<Position> shuffedList = listAfterUpdate;
+				Collections.shuffle(shuffedList);
+				if (getCostOfListPositions(distances, shuffedList, storeCoordinate) < getCostOfListPositions(distances,
+						listAfterUpdate, storeCoordinate))
+					listAfterUpdate = shuffedList;
 			} else {
-				System.out.println("update base on global..................");
 				for (int j = 0; j < currentVelocity; j++) {
 
 					if (currentVelocity < globalCurrentlistOfPositions.size())
@@ -158,12 +160,7 @@ public class Particle {
 						position = findPosition(visitedPositions, globalCurrentlistOfPositions
 								.get(globalCurrentlistOfPositions.size() - 1).getPriority());
 
-					System.out.println("<<<<<>shipper> " + i + "\nvelocity: " + currentVelocity
-							+ "\nglobalCurrentlistOfPositions: >>>>>>>>>>>" + globalCurrentlistOfPositions.size());
-					showListPosition(globalCurrentlistOfPositions);
-
 					if (position == null) {
-
 						if (currentVelocity < globalCurrentlistOfPositions.size())
 							position = findPosition(unvisitedPositions,
 									globalCurrentlistOfPositions.get(j).getPriority());
@@ -175,7 +172,6 @@ public class Particle {
 							System.out.println("This position is not real!");
 						else {
 							listAfterUpdate.add(position);
-							// globalCurrentlistOfPositions.remove(position);
 							visitedPositions.add(position);
 							unvisitedPositions.remove(position);
 						}
@@ -185,12 +181,7 @@ public class Particle {
 						if (globalCurrentlistOfPositions.size() == 0)
 							globalCurrentlistOfPositions.add(unvisitedPositions.get(0));
 					}
-
-					System.out.println("<<<<<<1 listAfterUpdate--------------------");
-					showListPosition(listAfterUpdate);
 				}
-				System.out.println("update base on list position..................");
-				showListPosition(listOfPositions);
 				for (int j = 0; j < num; j++) {
 					Collections.shuffle(listOfPositions);
 
@@ -212,7 +203,6 @@ public class Particle {
 							System.out.println("This position is not real!");
 						else {
 							listAfterUpdate.add(position);
-							// listOfPositions.remove(position);
 							visitedPositions.add(position);
 							unvisitedPositions.remove(position);
 						}
@@ -222,73 +212,41 @@ public class Particle {
 						if (listOfPositions.size() == 0)
 							listOfPositions.add(unvisitedPositions.get(0));
 					}
-
-					System.out.println("<<2 list in updatePosition after update position method--------------------");
-					showListPosition(listAfterUpdate);
 				}
-
-//			for (int j = 0; j < groupOfPosition; j++) {
-//				int currentPosition = listOfPositions.get(j).getPriority();
-//				// double currentVelocity = ListOfCurrentVelocity.get(j);
-//				int nextPosition = currentPosition;
-//				Position position = new Position();
-//
-//				nextPosition += (int) Math.round(currentVelocity.size());
-//				while (true) {
-//					if (nextPosition <= 0)
-//						// nextPosition += (int) Math.abs(Math.round(currentVelocity));
-//						nextPosition = unvisitedPositions.get(0).getPriority();
-//					else if (nextPosition > numOfPositions)
-//						// nextPosition -= (int) Math.abs(Math.round(currentVelocity));
-//						nextPosition = unvisitedPositions.get(unvisitedPositions.size() - 1).getPriority();
-//					if (nextPosition > 0 && nextPosition <= numOfPositions) {
-//						position = findPosition(visitedPositions, nextPosition);
-//						if (position == null) {
-//							position = findPosition(unvisitedPositions, nextPosition);
-//							if (position == null)
-//								System.out.println("This position is not real!");
-//							else {
-//								listOfPositions.remove(j);
-//								listOfPositions.add(j, position);
-//								visitedPositions.add(position);
-//								unvisitedPositions.remove(position);
-//								break;
-//							}
-//						} else
-//							nextPosition = unvisitedPositions.get(0).getPriority();
-//					} else
-//						nextPosition++;
-//				}
+				ArrayList<Position> shuffedList = listAfterUpdate;
+				Collections.shuffle(shuffedList);
+				if (getCostOfListPositions(distances, shuffedList, storeCoordinate) < getCostOfListPositions(distances,
+						listAfterUpdate, storeCoordinate))
+					listAfterUpdate = shuffedList;
 			}
-			if (currentVelocity == 0) {
-				System.out.println("else currentVelocity == 0 ..................");
 
-			} else
-				System.out.println("list of shipper " + i + " ..................");
-			showListPosition(listAfterUpdate);
-			solution.get(String.valueOf(i))
-					.setCost(getCostOfListPositions(distances, listAfterUpdate, storeCoordinate));
-			solution.get(String.valueOf(i)).setTour(listAfterUpdate);
+			double cost = getCostOfListPositions(distances, listAfterUpdate, storeCoordinate);
+			//showListPosition(listAfterUpdate);
+			SubSolution currentSubSolution = new SubSolution(listAfterUpdate, cost, distances);
+			solution.put(String.valueOf(i), currentSubSolution);
 
 		}
-		System.out.println("end update position  -----------------------");
 	}
 
-	public Position getCurrentPosition(ArrayList<Position> listFindedPosition, Position positionNeedToFind,
-			int numOfFound, Position lastPosition) {
-		Position position = new Position();
-		if (numOfFound < listFindedPosition.size())
-			position = findPosition(listFindedPosition, positionNeedToFind.getPriority());
-		else
-			position = findPosition(listFindedPosition, lastPosition.getPriority());
-		return position;
+	public void showSolution(HashMap<String, SubSolution> solution) {
+		for (int m = 0; m < numOfShippers; m++) {
+			SubSolution currentSolution = solution.get(String.valueOf(m));
+			List<Position> list = currentSolution.getTour();
+			int num = list.size();
+			System.out.print("Shipper: " + m + "| ");
+			for (int j = 0; j < num; j++) {
+				System.out.print(list.get(j).getPriority() + " ");
+			}
+			System.out.println("distances cost: " + currentSolution.getCost());
+			System.out.println();
+		}
 	}
 
 	private void showListPosition(ArrayList<Position> listOfPositions) {
 		for (Position position : listOfPositions) {
-			System.out.println(">>: " + position.getPriority());
+			System.out.print("> " + position.getPriority());
 		}
-
+		System.out.println();
 	}
 
 	public double getCostOfListPositions(HashMap<PositionPair, Double> distances, ArrayList<Position> listOfPositions,
@@ -329,13 +287,15 @@ public class Particle {
 	}
 
 	public void updateFitness(double timeOfShift, double preparedTime, double velocityOfShipper) {
+		//System.out.println("start update fitness -----------" + getBestFitness());
 		double cost = getCostOfSolution(solution);
 		boolean timeConstraint = isTimeOfShiftGreaterThanMovementTime(solution, timeOfShift, preparedTime,
 				velocityOfShipper);
 		if (cost < bestFitness) {
-			setPersonalBestSolution(new HashMap<>(solution));
-			bestFitness = cost;
+			setPersonalBestSolution(solution);
+			this.setBestFitness(cost);
 		}
+		//System.out.println("end update fitness " + cost + "-----------" + getBestFitness());
 	}
 
 	private boolean isTimeOfShiftGreaterThanMovementTime(HashMap<String, SubSolution> currentSolution,
@@ -393,7 +353,7 @@ public class Particle {
 	}
 
 	public void setPersonalBestSolution(HashMap<String, SubSolution> personalBestSolution) {
-		this.personalBestSolution = personalBestSolution;
+		this.personalBestSolution = new HashMap<>(personalBestSolution);
 	}
 
 	public HashMap<String, SubSolution> getSolution() {
