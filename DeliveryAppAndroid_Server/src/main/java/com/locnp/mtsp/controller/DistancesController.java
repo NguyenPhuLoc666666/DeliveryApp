@@ -1,9 +1,11 @@
 package com.locnp.mtsp.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import org.hibernate.sql.ast.tree.expression.Collation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.repository.query.Param;
@@ -61,13 +63,78 @@ public class DistancesController {
 		distancesService.saveDistances(distancesRequest);
 	}
 
+	HashMap<PositionPair, Double> distances;
+
+	@GetMapping("/getDistances")
+	@ResponseStatus(HttpStatus.OK)
+	private void getDistances() {
+		distances = convertListResponseToHashMapDuration(getListDistances());
+	}
+
 	@GetMapping("/getSolution")
 	@ResponseStatus(HttpStatus.OK)
 	private void getSolution() {
-		finalSolution = mTSPSolving();
-		distancesService.getSolution(finalSolution);
+
+		List<Position> listpositions = convertListResponseToListPosition(getListPositions());
+
+		List<Position> positions = reducePositions(listpositions, 25);
+		int numOfShipper = (int) Math.round(positions.size() * 2 / 10);
+		finalSolution = mTSPSolving(positions, distances, numOfShipper);
+
+		//System.out.println(">>>>>>>>>>>>>>>."+getTraidionalDivideMeothod(positions));
+		// tspSolving(distances);
+		//distancesService.getSolution(finalSolution);
 	}
-	
+
+	private List<Position> reducePositions(List<Position> listpositions, int limit) {
+		List<Position> positions = new ArrayList<>();
+		for (int i = 0; i < limit; i++) {
+			positions.add(listpositions.get(i));
+		}
+		return positions;
+	}
+
+	private void tspSolving(HashMap<PositionPair, Double> distances) {
+		List<Position> positionsOfFinal = new ArrayList<>();
+		HashMap<String, SubSolution> solution = new HashMap<>();
+		for (int i = 0; i < finalSolution.size(); i++) {
+			positionsOfFinal = finalSolution.get(String.valueOf(i)).getTour();
+			solution = mTSPSolving(positionsOfFinal, distances, 1);
+			SubSolution sub = new SubSolution(solution.get(String.valueOf(0)).getTour(),
+					solution.get(String.valueOf(0)).getCost());
+			finalSolution.put(String.valueOf(i), sub);
+			solution = new HashMap<>();
+		}
+
+	}
+
+	private double getTraidionalDivideMeothod(List<Position> positions) {
+		double cost = 0;
+		List<Position> traditionalList = new ArrayList<>(positions);
+		traditionalList.remove(0);
+		List<Position> divisionList = new ArrayList<>();
+		HashMap<String, SubSolution> solution = new HashMap<>();
+		int count=0;
+		Collections.shuffle(traditionalList);
+		Position storeCoordinate = positions.get(0);
+		while (traditionalList.size() > 1) {
+			divisionList.add(storeCoordinate);
+			if (traditionalList.size() > 5)
+				for (int i = 0; i < 5; i++) {
+					divisionList.add(traditionalList.get(0));
+					traditionalList.remove(0);
+				}
+			else
+				divisionList = traditionalList;
+			solution = mTSPSolving(divisionList, distances, 1);
+			cost += solution.get(String.valueOf(0)).getCost();
+			System.out.println(">>>>>"+((count++)*5)+"cost traditional: "+cost);
+			divisionList = new ArrayList<>();
+		}
+
+		return cost;
+	}
+
 	@GetMapping("/getFinalSolution")
 	@ResponseStatus(HttpStatus.OK)
 	private List<SubSolutionResponse> getgetFinalSolutionSolution() {
@@ -82,10 +149,9 @@ public class DistancesController {
 
 	@Autowired
 	private RestTemplate restTemplate;
-	
+
 	public List<PositionResponse> getListPositions() {
-		// Call the /getAllPositions endpoint in MyController using RestTemplate
-		String url = "http://localhost:9000/api/position/getTestData?testData="+50;
+		String url = "http://localhost:9000/api/position/getTestData?testData=200";
 		ResponseEntity<List<PositionResponse>> responseGetTestData = restTemplate.exchange(url, HttpMethod.GET, null,
 				new ParameterizedTypeReference<List<PositionResponse>>() {
 				});
@@ -94,7 +160,8 @@ public class DistancesController {
 	}
 
 	public List<DistancesResponse> getListDistances() {
-		String url_distances = "http://localhost:9000/api/distances/getTestDataDistances?testData="+100;
+		String url_distances = "http://localhost:9000/api/distances/getTestDataDistances?testData=" + 400;
+		// String url_distances = "http://localhost:9000/api/distances/getAllDistances";
 		ResponseEntity<List<DistancesResponse>> responseGetDistances = restTemplate.exchange(url_distances,
 				HttpMethod.GET, null, new ParameterizedTypeReference<List<DistancesResponse>>() {
 				});
@@ -104,19 +171,16 @@ public class DistancesController {
 
 	@SuppressWarnings("null")
 	public List<PositionEntity> convertListResponseToListPositionEntity(List<PositionResponse> positionsResponse) {
-		System.out.println("-----------start convertListResponseToListPositionEntity");
 		List<PositionEntity> positions = new ArrayList<>();
 		for (PositionResponse response : positionsResponse) {
 			PositionEntity position = new PositionEntity(response.getLatitude(), response.getLongitude());
 			positions.add(position);
 		}
-		System.out.println("-----------end convertListResponseToListPositionEntity");
 		return positions;
 	}
 
 	@SuppressWarnings("null")
 	public List<Position> convertListResponseToListPosition(List<PositionResponse> positionsResponse) {
-		System.out.println("-----------start convertListResponseToListPosition");
 		List<Position> positions = new ArrayList<>();
 		if (positionsResponse != null)
 			for (PositionResponse response : positionsResponse) {
@@ -124,21 +188,18 @@ public class DistancesController {
 						response.getPriority(), response.getTestData());
 				positions.add(position);
 			}
-		System.out.println("-----------end convertListResponseToListPosition");
 		return positions;
 	}
 
 	private HashMap<String, SubSolution> finalSolution;
 
-	public HashMap<String, SubSolution> mTSPSolving() {
-		
-		List<Position> positions = convertListResponseToListPosition(getListPositions());
+	public HashMap<String, SubSolution> mTSPSolving(List<Position> positions, HashMap<PositionPair, Double> distances,
+			int numOfShippers) {
 
-		HashMap<PositionPair, Double> distances = convertListResponseToHashMapDuration(getListDistances());
-		log.info("mtsp","|=================Start algorithms!===============|");
-		int numOfParticles = 150;
+		log.info("mtsp", "|=================Start algorithms!===============|");
+		int numOfParticles = 100;
 		int numOfPositions = positions.size() - 1;
-		int numOfShippers = 5;
+
 		double c1 = 2;
 		double c2 = 2;
 		double wMax = 0.9;
@@ -149,7 +210,7 @@ public class DistancesController {
 		pso.solvePSO(positions);
 
 		HashMap<String, SubSolution> finalSolution = pso.getBestGlobalParticle().getPersonalBestSolution();
-		System.out.println("----------finalSolution: " + pso.getBestGlobalParticle().getBestFitness());
+		log.info("finalSolution","----------finalSolution: " + pso.getBestGlobalParticle().getBestFitness());
 		for (int i = 0; i < numOfShippers; i++) {
 			SubSolution currentSolution = finalSolution.get(String.valueOf(i));
 			List<Position> list = currentSolution.getTour();
@@ -161,32 +222,22 @@ public class DistancesController {
 			System.out.println("distances cost: " + currentSolution.getCost());
 			System.out.println();
 		}
-		log.info("mtsp","|=================Done!===============|");
+		log.info("mtsp", "|=================Done!===============|");
 		return finalSolution;
 	}
 
 	public HashMap<PositionPair, Double> convertListResponseToHashMapDuration(List<DistancesResponse> listResponse) {
-		System.out.println("-----------start convertListResponseToHashMapDistances: " + listResponse.size());
 		HashMap<PositionPair, Double> distances = new HashMap<>();
 		for (DistancesResponse response : listResponse) {
 			PositionPair poskey = new PositionPair(
 					new Position(response.getDepartLatitude(), response.getDepartLongitude()),
 					new Position(response.getDestinationLatitude(), response.getDestinationLongitude()));
 			distances.put(poskey, response.getDuration());
-			//System.out.println("-----------end convert:" + distances.get(poskey));
+			// System.out.println("-----------end convert:" + distances.get(poskey));
 		}
-		System.out.println("-----------end convertListResponseToHashMapDistances: " + distances.size());
+		log.info("end","-----------end convertListResponseToHashMapDistances");
 		return distances;
 	}
-
-//	public HashMap<PositionPair, Double> convertListResponseToListPosition(List<PositionResponse> positionsResponse) {
-//		List<PositionEntity> positions = null;
-//		for (PositionResponse response : positionsResponse) {
-//			PositionEntity position = new PositionEntity(response.getLatitude(), response.getLongitude());
-//			positions.add(position);
-//		}
-//		return positions;
-//	}
 
 	@PostMapping("/getDistancesDatafromMapbox")
 	@ResponseStatus(HttpStatus.OK)
@@ -194,7 +245,8 @@ public class DistancesController {
 
 		List<Position> positions = convertListResponseToListPosition(getListPositions());
 		System.out.println("positionsResponse: " + positions.size());
-		String mapbox_access_token = "pk.eyJ1IjoiZHVjbmd1eWVuNjg4NiIsImEiOiJjbGdkYWg4MWExcjI1M3BvNmVldW4xZ2ZzIn0.UzKxHntHuS-8jDi3agcwLA";
+		// String mapbox_access_token =
+		// "pk.eyJ1IjoiZHVjbmd1eWVuNjg4NiIsImEiOiJjbGdkYWg4MWExcjI1M3BvNmVldW4xZ2ZzIn0.UzKxHntHuS-8jDi3agcwLA";
 
 		int innerLoop = positions.size();
 		int outerLoop = innerLoop / 25 + 1;
@@ -214,9 +266,8 @@ public class DistancesController {
 
 						destinations.add(destination);
 					}
-					//TO DO: testData 0->23 need one more col
-					int testData = createNumberTestData(i, (int) (col + 24));
-					callMapboxMatrixAPI(mapbox_access_token, source, destinations, testData);
+					int testData = createNumberTestData(i, col + 24);
+					// callMapboxMatrixAPI(mapbox_access_token, source, destinations, testData);
 					destinations.clear();
 				}
 			} else {
@@ -229,20 +280,20 @@ public class DistancesController {
 								positions.get(i).getLongitude());
 						destinations.add(source);
 						for (int j = 0; j < num; j++) {
-							PositionEntity destination = new PositionEntity(positions.get(col + j).getLatitude(),
-									positions.get(col + j).getLongitude());
+							PositionEntity destination = new PositionEntity(positions.get(col).getLatitude(),
+									positions.get(col).getLongitude());
 							destinations.add(destination);
+							col++;
 						}
-						int testData = createNumberTestData(i, col);
-						callMapboxMatrixAPI(mapbox_access_token, source, destinations, testData);
+						int testData = createNumberTestData(i, col + 24);
+						// callMapboxMatrixAPI(mapbox_access_token, source, destinations, testData);
 						destinations.clear();
 					}
 				}
 			}
 		}
-		//TO DO: result thiếu 25 điểm cho test 25, 100 cho test 100
-		System.out.println("|=================CAll successful!===============|");
-		
+		log.info("Call","|=================CAll successful!===============|");
+
 	}
 
 	private String getNumOfPositionToCallAPI(int listSize) {
@@ -271,11 +322,8 @@ public class DistancesController {
 					new ParameterizedTypeReference<MatrixResponse>() {
 					});
 			if (response.getStatusCode().is2xxSuccessful()) {
-				// Xử lý response thành công
 				MatrixResponse responseBody = response.getBody();
-				// destinations.remove(source);
 				postDistancesToDB(source, destinations, responseBody, testData);
-
 			} else {
 				System.out.println("Failed: " + response.getStatusCode() + " call matrix mapbox api failed");
 			}
@@ -287,10 +335,10 @@ public class DistancesController {
 	public void postDistancesToDB(PositionEntity source, List<PositionEntity> destinations, MatrixResponse response,
 			int testData) {
 		List<DistancesEntity> distances = new ArrayList<>();
-		
+
 		destinations.remove(0);
 		int groupSize = destinations.size();
-		
+
 		System.out.println("groupSize:  " + groupSize);
 		for (int j = 0; j < groupSize; j++) {
 
@@ -301,9 +349,6 @@ public class DistancesController {
 
 			currentDistance.setTestData(testData);
 			distances.add(currentDistance);
-			System.out.println(">>>>" + j + ">>>Distance: " + currentDistance.getDistance() + ">>>duration: "
-					+ currentDistance.getDuration() + ">>>testData: " + currentDistance.getTestData());
-
 		}
 		distancesService.saveDistances(distances);
 	}
@@ -313,8 +358,39 @@ public class DistancesController {
 		int testData = 0;
 		if (j < 25)
 			testData = countTestData(i);
-		else
+		else if (i < 25)
 			testData = countTestData(j);
+		else if (i >= 25 && i < 50)
+			if (j < 50)
+				testData = 50;
+			else
+				testData = countTestData(j);
+		else if (i >= 50 && i < 100)
+			if (j < 100)
+				testData = 100;
+			else
+				testData = countTestData(j);
+		else if (i >= 100 && i < 200)
+			if (j < 200)
+				testData = 200;
+			else
+				testData = countTestData(j);
+		else if (i >= 200 && i < 400)
+			if (j < 400)
+				testData = 400;
+			else
+				testData = countTestData(j);
+		else if (i >= 400 && i < 800)
+			if (j < 800)
+				testData = 800;
+			else
+				testData = countTestData(j);
+		else if (i >= 800)
+			if (j >= 800)
+				testData = 1000;
+			else
+				testData = countTestData(j);
+
 		return testData;
 
 	}
@@ -333,7 +409,7 @@ public class DistancesController {
 			testData = 400;
 		else if (j >= 400 && j < 800)
 			testData = 800;
-		else if (j >= 800 && j < 1000)
+		else if (j < 1100)
 			testData = 1000;
 		return testData;
 	}

@@ -1,7 +1,5 @@
 package com.locnp.mtsp.entity;
 
-import com.locnp.mtsp.mTSPUsingPSO.PositionPair;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

@@ -29,11 +29,10 @@ public class PSO {
 	private double preparedTime = 0.17; /* = 10 minutes = 0.17*60 */
 	private double acceptedRange = 0.25;
 	private int loop = 0;
-	private int numOfLoops = 200;
+	private int numOfLoops = 1000;
 
 	public PSO(int numOfParticles, int numOfPositions, int numOfShippers, HashMap<PositionPair, Double> distances,
 			Position storeCoordinate, double w, double c1, double c2) {
-		System.out.println("-----------start create constructor solution");
 		this.numOfParticles = numOfParticles;
 		this.numOfPositions = numOfPositions;
 		this.numOfShippers = numOfShippers;
@@ -46,7 +45,8 @@ public class PSO {
 		this.c1 = c1;
 		this.c2 = c2;
 		do {
-			minNumOfPosition = (int) Math.ceil(this.numOfPositions / this.numOfShippers);
+			minNumOfPosition = (int) Math.floor((this.numOfPositions+1) / this.numOfShippers);
+			System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>minNumOfPosition: "+minNumOfPosition);
 			if (minNumOfPosition == 1) {
 				this.numOfShippers = this.numOfPositions / 2;
 			} else if (minNumOfPosition == 0) {

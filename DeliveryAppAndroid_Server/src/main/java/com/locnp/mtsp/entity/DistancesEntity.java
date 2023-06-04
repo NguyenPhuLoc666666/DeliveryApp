@@ -30,7 +30,7 @@ public class DistancesEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "distances_id", nullable = false)
-	int distances_id;
+	int id;
 	@Column(name = "depart_latitude", nullable = false)
 	double departLatitude;
 	@Column(name = "depart_longitude", nullable = false)
