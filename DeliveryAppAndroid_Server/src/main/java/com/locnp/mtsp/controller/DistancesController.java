@@ -5,10 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.hibernate.sql.ast.tree.expression.Collation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -97,7 +95,7 @@ public class DistancesController {
 		HashMap<String, SubSolution> result = mTSPSolving(tempListPositions, distances, numOfShipper);
 		return distancesService.getSolution(result);
 	}
-	
+
 	@GetMapping("/solveTSP")
 	@ResponseStatus(HttpStatus.OK)
 	private List<SubSolutionResponse> solveTSP(@RequestBody List<Position> listpositions) {
