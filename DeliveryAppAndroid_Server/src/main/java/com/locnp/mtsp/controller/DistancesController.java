@@ -81,9 +81,30 @@ public class DistancesController {
 		int numOfShipper = (int) Math.round(positions.size() * 2 / 10);
 		finalSolution = mTSPSolving(positions, distances, numOfShipper);
 
-		//System.out.println(">>>>>>>>>>>>>>>."+getTraidionalDivideMeothod(positions));
+		// System.out.println(">>>>>>>>>>>>>>>."+getTraidionalDivideMeothod(positions));
 		// tspSolving(distances);
-		//distancesService.getSolution(finalSolution);
+		// distancesService.getSolution(finalSolution);
+	}
+
+	public SubSolution subSolutionOfCurrentShipper;
+
+	@GetMapping("/solveTSPTest")
+	@ResponseStatus(HttpStatus.OK)
+	private List<SubSolutionResponse> solveTSPTest() {
+		int numOfShipper = 1;
+		List<Position> tempListPositions = finalSolution.get(String.valueOf(0)).getTour();
+		tempListPositions.add(0,storeCoordinate);
+		HashMap<String, SubSolution> result = mTSPSolving(tempListPositions, distances, numOfShipper);
+		return distancesService.getSolution(result);
+	}
+	
+	@GetMapping("/solveTSP")
+	@ResponseStatus(HttpStatus.OK)
+	private List<SubSolutionResponse> solveTSP(@RequestBody List<Position> listpositions) {
+		int numOfShipper = 1;
+		listpositions.add(0,storeCoordinate);
+		HashMap<String, SubSolution> result = mTSPSolving(listpositions, distances, numOfShipper);
+		return distancesService.getSolution(result);
 	}
 
 	private List<Position> reducePositions(List<Position> listpositions, int limit) {
@@ -114,7 +135,7 @@ public class DistancesController {
 		traditionalList.remove(0);
 		List<Position> divisionList = new ArrayList<>();
 		HashMap<String, SubSolution> solution = new HashMap<>();
-		int count=0;
+		int count = 0;
 		Collections.shuffle(traditionalList);
 		Position storeCoordinate = positions.get(0);
 		while (traditionalList.size() > 1) {
@@ -128,7 +149,7 @@ public class DistancesController {
 				divisionList = traditionalList;
 			solution = mTSPSolving(divisionList, distances, 1);
 			cost += solution.get(String.valueOf(0)).getCost();
-			System.out.println(">>>>>"+((count++)*5)+"cost traditional: "+cost);
+			System.out.println(">>>>>" + ((count++) * 5) + "cost traditional: " + cost);
 			divisionList = new ArrayList<>();
 		}
 
@@ -192,7 +213,7 @@ public class DistancesController {
 	}
 
 	private HashMap<String, SubSolution> finalSolution;
-
+	private Position storeCoordinate;
 	public HashMap<String, SubSolution> mTSPSolving(List<Position> positions, HashMap<PositionPair, Double> distances,
 			int numOfShippers) {
 
@@ -203,14 +224,14 @@ public class DistancesController {
 		double c1 = 2;
 		double c2 = 2;
 		double wMax = 0.9;
-		Position storeCoordinate = positions.get(0);
+		storeCoordinate = positions.get(0);
 		PSO pso = new PSO(numOfParticles, numOfPositions, numOfShippers, distances, storeCoordinate, wMax, c1, c2);
 		positions.remove(storeCoordinate);
 		System.out.println("storeCoordinate: " + storeCoordinate.getCoordinate() + " | " + positions.size());
 		pso.solvePSO(positions);
 
 		HashMap<String, SubSolution> finalSolution = pso.getBestGlobalParticle().getPersonalBestSolution();
-		log.info("finalSolution","----------finalSolution: " + pso.getBestGlobalParticle().getBestFitness());
+		log.info("finalSolution", "----------finalSolution: " + pso.getBestGlobalParticle().getBestFitness());
 		for (int i = 0; i < numOfShippers; i++) {
 			SubSolution currentSolution = finalSolution.get(String.valueOf(i));
 			List<Position> list = currentSolution.getTour();
@@ -235,7 +256,7 @@ public class DistancesController {
 			distances.put(poskey, response.getDuration());
 			// System.out.println("-----------end convert:" + distances.get(poskey));
 		}
-		log.info("end","-----------end convertListResponseToHashMapDistances");
+		log.info("end", "-----------end convertListResponseToHashMapDistances");
 		return distances;
 	}
 
@@ -292,7 +313,7 @@ public class DistancesController {
 				}
 			}
 		}
-		log.info("Call","|=================CAll successful!===============|");
+		log.info("Call", "|=================CAll successful!===============|");
 
 	}
 
