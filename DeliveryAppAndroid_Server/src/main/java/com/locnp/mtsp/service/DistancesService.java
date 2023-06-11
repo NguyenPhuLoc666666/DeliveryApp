@@ -69,7 +69,6 @@ public class DistancesService {
 		return listOfDistances.stream().map(distances-> mapToDistancesResponse(distances)).toList();
 	}
 
-	//TO DO: load list tour is null
 	public List<SubSolutionResponse> getSolution(HashMap<String, SubSolution> finalSolution) {
 		int num = finalSolution.size();
 		List<SubSolution> list = new ArrayList<>();
