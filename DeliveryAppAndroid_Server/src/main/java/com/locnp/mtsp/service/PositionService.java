@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import com.locnp.mtsp.dto.PositionRequest;
 import com.locnp.mtsp.dto.PositionResponse;
 import com.locnp.mtsp.entity.PositionEntity;
-import com.locnp.mtsp.repository.PositionJpaRepo;
 import com.locnp.mtsp.repository.PositionRepository;
 
 import lombok.RequiredArgsConstructor;

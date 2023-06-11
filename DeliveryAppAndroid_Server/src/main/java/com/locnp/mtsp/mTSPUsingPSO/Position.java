@@ -8,10 +8,8 @@ public class Position {
 	private double longtitude = 0;
 	private boolean status = true;
 	private int priority;
-	// private int visted=-1; history
 	private int testData;
 
-	// private Info info = null;
 	public Position() {
 
 	}

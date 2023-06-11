@@ -75,13 +75,6 @@ public class Particle {
 
 			velocity.put(String.valueOf(i), numOfPositions);
 		}
-		//showListVelocity();
-	}
-
-	public void showListVelocity() {
-		for (int i = 0; i < numOfShippers; i++) {
-			System.out.println("velocity " + i + ": " + velocity.get(String.valueOf(i)));
-		}
 	}
 
 	private boolean isEqualGroupOfPosition(HashMap<String, SubSolution> solution) {
@@ -130,8 +123,7 @@ public class Particle {
 			listOfPositions = new ArrayList<>();
 		}
 		for (int i = 0; i < numOfShippers; i++) {
-			//System.out.println("update from global of shipper: " + i);
-
+			
 			listAfterUpdate = new ArrayList<>();
 			listOfPositions = new ArrayList<>(solution.get(String.valueOf(i)).getTour());
 
@@ -192,7 +184,6 @@ public class Particle {
 								listOfPositions.get(listOfPositions.size() - 1).getPriority());
 
 					if (position == null) {
-
 						if (num < listOfPositions.size())
 							position = findPosition(unvisitedPositions, listOfPositions.get(j).getPriority());
 						else
@@ -221,7 +212,6 @@ public class Particle {
 			}
 
 			double cost = getCostOfListPositions(distances, listAfterUpdate, storeCoordinate);
-			//showListPosition(listAfterUpdate);
 			SubSolution currentSubSolution = new SubSolution(listAfterUpdate, cost, distances);
 			solution.put(String.valueOf(i), currentSubSolution);
 
@@ -242,12 +232,7 @@ public class Particle {
 		}
 	}
 
-	private void showListPosition(ArrayList<Position> listOfPositions) {
-		for (Position position : listOfPositions) {
-			System.out.print("> " + position.getPriority());
-		}
-		System.out.println();
-	}
+	
 
 	public double getCostOfListPositions(HashMap<PositionPair, Double> distances, ArrayList<Position> listOfPositions,
 			Position storeCoordinate) {
@@ -287,7 +272,6 @@ public class Particle {
 	}
 
 	public void updateFitness(double timeOfShift, double preparedTime, double velocityOfShipper) {
-		//System.out.println("start update fitness -----------" + getBestFitness());
 		double cost = getCostOfSolution(solution);
 		boolean timeConstraint = isTimeOfShiftGreaterThanMovementTime(solution, timeOfShift, preparedTime,
 				velocityOfShipper);
@@ -295,7 +279,6 @@ public class Particle {
 			setPersonalBestSolution(solution);
 			this.setBestFitness(cost);
 		}
-		//System.out.println("end update fitness " + cost + "-----------" + getBestFitness());
 	}
 
 	private boolean isTimeOfShiftGreaterThanMovementTime(HashMap<String, SubSolution> currentSolution,
@@ -338,6 +321,13 @@ public class Particle {
 				&& this.isEqualGroupOfPosition(particle.getPersonalBestSolution()))
 			return true;
 		return false;
+	}
+	
+	private void showListPosition(ArrayList<Position> listOfPositions) {
+		for (Position position : listOfPositions) {
+			System.out.print("> " + position.getPriority());
+		}
+		System.out.println();
 	}
 
 	public double getBestFitness() {

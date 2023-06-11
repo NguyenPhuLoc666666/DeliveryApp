@@ -27,9 +27,9 @@ public class PSO {
 	private double velocityOfShipper = 30;
 	private double timeOfShift = 2;
 	private double preparedTime = 0.17; /* = 10 minutes = 0.17*60 */
-	private double acceptedRange = 0.25;
+	private double acceptedRange = 600;
 	private int loop = 0;
-	private int numOfLoops = 1000;
+	private int numOfLoops = 200;
 
 	public PSO(int numOfParticles, int numOfPositions, int numOfShippers, HashMap<PositionPair, Double> distances,
 			Position storeCoordinate, double w, double c1, double c2) {
@@ -65,13 +65,7 @@ public class PSO {
 		do {
 			for (int i = 0; i < numOfParticles; i++) {
 				Particle currentParticle = particles[i].clone();
-				if (currentParticle.getBestFitness() < globalBestParticle.getBestFitness()
-
-				/*
-				 * &&
-				 * isTimeOfShiftGreaterThanMovementTime(currentParticle.getPersonalBestSolution(
-				 * ))
-				 */) {
+				if (currentParticle.getBestFitness() < globalBestParticle.getBestFitness()) {
 					globalBestParticle = currentParticle.clone();
 				}
 			}
@@ -126,17 +120,7 @@ public class PSO {
 		}
 	}
 
-	private void showBestPersonalSolution() {
-		int i = 0;
-		for (Particle particle : particles) {
-			System.out.println(
-					"--particle[" + (i++) + "]: " + particle.getCostOfSolution(particle.getPersonalBestSolution()));
-		}
-	}
-
-	public void showParticleCost(Particle particle) {
-		System.out.print(">>>" + particle.getBestFitness());
-	}
+	
 
 	private int getCurrentIndexGroupOfPositions(HashMap<String, SubSolution> globalBestParticle) {
 		int groupOfPositionsSize = groupOfPositions.size();
@@ -380,6 +364,14 @@ public class PSO {
 		return subDistanceMatrix;
 	}
 
+	private void showBestPersonalSolution() {
+		int i = 0;
+		for (Particle particle : particles) {
+			System.out.println(
+					"--particle[" + (i++) + "]: " + particle.getCostOfSolution(particle.getPersonalBestSolution()));
+		}
+	}
+	
 	public Particle getBestGlobalParticle() {
 		return globalBestParticle;
 	}

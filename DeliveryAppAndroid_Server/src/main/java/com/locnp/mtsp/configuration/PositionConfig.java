@@ -7,14 +7,8 @@ import com.locnp.mtsp.service.PositionService;
 
 @Configuration
 public class PositionConfig {
-	@Bean
-	public PositionService positionBean() {
-		return new PositionService();
-	}
-
-//	    @Bean
-//	    public ModelMapper modelMapperBean() {
-//	        return new ModelMapper();
-//	    }
-
+//	@Bean
+//	public PositionService positionBean() {
+//		return new PositionService();
+//	}
 }
